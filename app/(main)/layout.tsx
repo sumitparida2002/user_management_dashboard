@@ -8,11 +8,12 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-full">
+    <div className="h-full ">
       <Navbar />
-      <div className="flex h-full ">
+      <div className="flex h-full  w-full ">
         <Sidebar />
-        <div className="overflow-scroll">{children}</div>
+
+        <div className="overflow-scroll w-full">{children}</div>
       </div>
     </div>
   );

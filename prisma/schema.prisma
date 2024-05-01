@@ -12,7 +12,48 @@ datasource db {
 }
 
 model User {
-  id    String  @id @default(uuid())
-  email String  @unique
-  name  String?
+  id       String @id @default(uuid())
+  email    String @unique
+  name     String
+  imageUrl String @db.Text
+
+  directMessages DirectMessage[]
+
+  conversationsInitiated Conversation[] @relation("UserOne")
+  conversationsReceived  Conversation[] @relation("UserTwo")
+}
+
+model Conversation {
+  id String @id @default(uuid())
+
+  userOneId String
+  userOne   User   @relation("UserOne", fields: [userOneId], references: [id], onDelete: Cascade)
+
+  userTwoId String
+  userTwo   User   @relation("UserTwo", fields: [userTwoId], references: [id], onDelete: Cascade)
+
+  directMessages DirectMessage[]
+
+  @@unique([userOneId, userTwoId])
+  @@index([userTwoId])
+}
+
+model DirectMessage {
+  id      String  @id @default(uuid())
+  content String  @db.Text
+  fileUrl String? @db.Text
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  deleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([conversationId])
 }

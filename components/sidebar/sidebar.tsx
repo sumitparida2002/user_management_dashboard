@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart, Home, Settings } from "lucide-react";
+import { BarChart, Group, Home, MessageCircle, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 import SidebarItem from "./sidebar-item";
 
@@ -13,6 +13,12 @@ export default function Sidebar() {
       label: "Home",
       href: "/",
       active: pathname !== "/",
+    },
+    {
+      logo: MessageCircle,
+      label: "Message",
+      href: "/message",
+      active: pathname !== "/message",
     },
     {
       logo: BarChart,

@@ -2,6 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDownIcon, MoreHorizontal } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +13,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export type User = {
   id: string;
@@ -55,12 +58,17 @@ export const columns: ColumnDef<User>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(student.id)}
+              onClick={() => {
+                toast("Copied to clipboard");
+                return navigator.clipboard.writeText(student.id);
+              }}
             >
               Copy student ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View Student</DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href={`student/${student.id}`}> View Student</Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
