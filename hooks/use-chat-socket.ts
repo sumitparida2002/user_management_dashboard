@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { User, DirectMessage } from "@prisma/client";
+import { User, Message } from "@prisma/client";
 
 import { useSocket } from "@/providers/socket-provider";
 
@@ -10,7 +10,7 @@ type ChatSocketProps = {
   queryKey: string;
 };
 
-type MessageWithUserProfile = DirectMessage & {
+type MessageWithUserProfile = Message & {
   user: User;
 };
 

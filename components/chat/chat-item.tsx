@@ -5,39 +5,32 @@ import axios from "axios";
 import qs from "query-string";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
+import { Message, User } from "@prisma/client";
 import { Edit, FileIcon, ShieldAlert, ShieldCheck, Trash } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 
-// import { UserAvatar } from "@/components/user-avatar";
-
+import { UserAvatar } from "@/components/user-avatar";
 import { cn } from "@/lib/utils";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/hooks/use-modal-store";
-import { User } from "@prisma/client";
+import { Interface } from "readline/promises";
+import { send } from "process";
 
 interface ChatItemProps {
   id: string;
-  content: string;
-  member: User;
-  timestamp: string;
+  text: string;
+  reciever: User;
+  createdAt: string;
   fileUrl: string | null;
-  deleted: boolean;
-  currentUser: User;
+  sender: User;
   isUpdated: boolean;
   socketUrl: string;
   socketQuery: Record<string, string>;
 }
-
-const roleIconMap = {
-  GUEST: null,
-  MODERATOR: <ShieldCheck className="h-4 w-4 ml-2 text-indigo-500" />,
-  ADMIN: <ShieldAlert className="h-4 w-4 ml-2 text-rose-500" />,
-};
 
 const formSchema = z.object({
   content: z.string().min(1),
@@ -45,13 +38,15 @@ const formSchema = z.object({
 
 export const ChatItem = ({
   id,
-  content,
-  member,
-  timestamp,
+  text,
+  reciever,
+  sender,
+  createdAt,
   fileUrl,
-  deleted,
-  currentUser,
+
+  // currentUser,
   isUpdated,
+
   socketUrl,
   socketQuery,
 }: ChatItemProps) => {
@@ -60,12 +55,14 @@ export const ChatItem = ({
   const params = useParams();
   const router = useRouter();
 
+  console.log(sender);
+
   const onMemberClick = () => {
-    if (member.id === currentUser.id) {
+    if (reciever.id === reciever.id) {
       return;
     }
 
-    router.push(`/servers/${params?.serverId}/conversations/${member.id}`);
+    router.push(`/servers/${params?.serverId}/conversations/${reciever.id}`);
   };
 
   useEffect(() => {
@@ -83,7 +80,7 @@ export const ChatItem = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      content: content,
+      content: text,
     },
   });
 
@@ -107,15 +104,15 @@ export const ChatItem = ({
 
   useEffect(() => {
     form.reset({
-      content: content,
+      content: text,
     });
-  }, [content]);
+  }, [text]);
 
   const fileType = fileUrl?.split(".").pop();
 
-  const isOwner = currentUser.id === member.id;
-  const canDeleteMessage = !deleted && isOwner;
-  const canEditMessage = !deleted && isOwner && !fileUrl;
+  // const isOwner = currentUser.id === currentUser.id;
+  // const canDeleteMessage = isOwner;
+  // const canEditMessage = isOwner && !fileUrl;
   const isPDF = fileType === "pdf" && fileUrl;
   const isImage = !isPDF && fileUrl;
 
@@ -126,7 +123,7 @@ export const ChatItem = ({
           onClick={onMemberClick}
           className="cursor-pointer hover:drop-shadow-md transition"
         >
-          {/* <UserAvatar src={member.profile.imageUrl} /> */}
+          <UserAvatar src={sender.imageUrl!} />
         </div>
         <div className="flex flex-col w-full">
           <div className="flex items-center gap-x-2">
@@ -135,12 +132,12 @@ export const ChatItem = ({
                 onClick={onMemberClick}
                 className="font-semibold text-sm hover:underline cursor-pointer"
               >
-                {member.name}
+                {sender.name}
               </p>
             </div>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">
+            {/* <span className="text-xs text-zinc-500 dark:text-zinc-400">
               {timestamp}
-            </span>
+            </span> */}
           </div>
           {isImage && (
             <a
@@ -149,12 +146,7 @@ export const ChatItem = ({
               rel="noopener noreferrer"
               className="relative aspect-square rounded-md mt-2 overflow-hidden border flex items-center bg-secondary h-48 w-48"
             >
-              <Image
-                src={fileUrl}
-                alt={content}
-                fill
-                className="object-cover"
-              />
+              <Image src={fileUrl} alt={text} fill className="object-cover" />
             </a>
           )}
           {isPDF && (
@@ -170,58 +162,11 @@ export const ChatItem = ({
               </a>
             </div>
           )}
-          {!fileUrl && !isEditing && (
-            <p
-              className={cn(
-                "text-sm text-zinc-600 dark:text-zinc-300",
-                deleted &&
-                  "italic text-zinc-500 dark:text-zinc-400 text-xs mt-1"
-              )}
-            >
-              {content}
-              {isUpdated && !deleted && (
-                <span className="text-[10px] mx-2 text-zinc-500 dark:text-zinc-400">
-                  (edited)
-                </span>
-              )}
-            </p>
-          )}
-          {!fileUrl && isEditing && (
-            <Form {...form}>
-              <form
-                className="flex items-center w-full gap-x-2 pt-2"
-                onSubmit={form.handleSubmit(onSubmit)}
-              >
-                <FormField
-                  control={form.control}
-                  name="content"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormControl>
-                        <div className="relative w-full">
-                          <Input
-                            disabled={isLoading}
-                            className="p-2 bg-zinc-200/90 dark:bg-zinc-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
-                            placeholder="Edited message"
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <Button disabled={isLoading} size="sm">
-                  Save
-                </Button>
-              </form>
-              <span className="text-[10px] mt-1 text-zinc-400">
-                Press escape to cancel, enter to save
-              </span>
-            </Form>
-          )}
+          {!fileUrl && !isEditing && <p>{text}</p>}
         </div>
       </div>
-      {canDeleteMessage && (
+
+      {/* {canDeleteMessage && (
         <div className="hidden group-hover:flex items-center gap-x-2 absolute p-1 -top-2 right-5 bg-white dark:bg-zinc-800 border rounded-sm">
           {canEditMessage && (
             <Edit
@@ -240,7 +185,7 @@ export const ChatItem = ({
             className="cursor-pointer ml-auto w-4 h-4 text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition"
           />
         </div>
-      )}
+      )} */}
     </div>
   );
 };

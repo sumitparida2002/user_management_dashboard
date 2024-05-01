@@ -12,48 +12,35 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(uuid())
-  email    String @unique
-  name     String
-  imageUrl String @db.Text
+  id       String  @id @default(uuid())
+  name     String?
+  email    String? @unique
+  imageUrl String?
 
-  directMessages DirectMessage[]
-
-  conversationsInitiated Conversation[] @relation("UserOne")
-  conversationsReceived  Conversation[] @relation("UserTwo")
+  conversations    Conversation[]
+  sentMessages     Message[]      @relation("sender")
+  receivedMessages Message[]      @relation("receiver")
 }
 
 model Conversation {
-  id String @id @default(uuid())
+  id   String  @id @default(cuid())
+  name String?
 
-  userOneId String
-  userOne   User   @relation("UserOne", fields: [userOneId], references: [id], onDelete: Cascade)
-
-  userTwoId String
-  userTwo   User   @relation("UserTwo", fields: [userTwoId], references: [id], onDelete: Cascade)
-
-  directMessages DirectMessage[]
-
-  @@unique([userOneId, userTwoId])
-  @@index([userTwoId])
+  users     User[]
+  messages  Message[]
+  createdAt DateTime  @default(now())
 }
 
-model DirectMessage {
-  id      String  @id @default(uuid())
-  content String  @db.Text
-  fileUrl String? @db.Text
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+model Message {
+  id             String       @id @default(cuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  text           String?
+  image          String?
+  sender         User         @relation(name: "sender", fields: [senderId], references: [id])
+  senderId       String
+  receiver       User         @relation(name: "receiver", fields: [receiverId], references: [id])
+  receiverId     String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
   conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-
-  deleted Boolean @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
-  @@index([conversationId])
 }
