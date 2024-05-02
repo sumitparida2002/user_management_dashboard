@@ -51,7 +51,7 @@ const ChannelIdPage = async ({ params }: MessageIdPageProps) => {
         <ChatMessages
           sender={profile!}
           paramKey="conversationId"
-          chatId=""
+          chatId={conversation.id}
           paramValue={conversation.id}
           reciever={reciever}
           apiUrl="/api/messages"
@@ -64,7 +64,9 @@ const ChannelIdPage = async ({ params }: MessageIdPageProps) => {
           apiUrl="/api/socket/messages"
           user={profile!}
           query={{
-            receiverId: params.recieverId,
+            conversationId: conversationId,
+            senderId: profile?.id,
+            recieverId: reciever?.id,
           }}
         />
       </>

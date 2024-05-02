@@ -123,7 +123,7 @@ export const ChatItem = ({
           onClick={onMemberClick}
           className="cursor-pointer hover:drop-shadow-md transition"
         >
-          <UserAvatar src={sender.imageUrl!} />
+          <UserAvatar src={sender?.imageUrl} />
         </div>
         <div className="flex flex-col w-full">
           <div className="flex items-center gap-x-2">
@@ -132,7 +132,7 @@ export const ChatItem = ({
                 onClick={onMemberClick}
                 className="font-semibold text-sm hover:underline cursor-pointer"
               >
-                {sender.name}
+                {sender?.name}
               </p>
             </div>
             {/* <span className="text-xs text-zinc-500 dark:text-zinc-400">
