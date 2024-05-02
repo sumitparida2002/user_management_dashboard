@@ -1,8 +1,8 @@
 "use client";
 
+import { CreateConversationModal } from "@/components/modals/create-conversation";
 import { useEffect, useState } from "react";
 
-// import { SelectChatModal } from "@/components/modals/select-chat-modal";
 export const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
 
@@ -14,5 +14,9 @@ export const ModalProvider = () => {
     return null;
   }
 
-  return <>{/* <SelectChatModal /> */}</>;
+  return (
+    <>
+      <CreateConversationModal />
+    </>
+  );
 };

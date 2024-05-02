@@ -7,6 +7,7 @@ import "@radix-ui/themes/styles.css";
 import { Theme } from "@radix-ui/themes";
 import { SocketProvider } from "@/providers/socket-provider";
 import { QueryProvider } from "@/providers/query-provider";
+import { ModalProvider } from "@/providers/modal-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,6 +27,7 @@ export default function RootLayout({
       <html lang="en">
         <body className={inter.className}>
           <SocketProvider>
+            <ModalProvider />
             <QueryProvider>{children}</QueryProvider>
           </SocketProvider>
           <Toaster />
