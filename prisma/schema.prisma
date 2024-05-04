@@ -44,3 +44,34 @@ model Message {
   conversation   Conversation @relation(fields: [conversationId], references: [id])
   conversationId String
 }
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum Label {
+  BUG
+  FEATURE
+  ENCHANCEMENT
+  DOCUMETATION
+}
+
+enum Status {
+  TODO
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+model Task {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  title     String
+  priority  Priority @default(LOW)
+  label     Label    @default(BUG)
+  status    Status   @default(TODO)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
